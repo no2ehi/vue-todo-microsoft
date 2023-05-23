@@ -85,7 +85,13 @@ export const useTodoStore = defineStore('todo', () => {
         }
     }
 
-    return {todos, categories, fetchTodos, addTask, completeTask, starTask, deleteTodo, editTodo, searchTodo, filterTodo, loading, searchResult, fitlerResult};
+    function addCategories(category: Category) {
+        if(category) {
+             
+        }
+    }
+
+    return {todos, categories, fetchTodos, addTask, completeTask, starTask, deleteTodo, editTodo, searchTodo, filterTodo, addCategories, loading, searchResult, fitlerResult};
 },
 {
     persist: {

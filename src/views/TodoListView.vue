@@ -11,6 +11,7 @@ import Pagination from '../components/pagination/Pagination.vue';
 
 // types
 import Todo from '../type/todo';
+import Category from '../type/category';
 import PaginationData from '../type/paginationData';
 
 // icons
@@ -22,6 +23,7 @@ todoStore.fetchTodos();
 
 const route = useRoute()
 
+const categories = ref<Category[]>(todoStore.categories);
 const allTodos = ref<Todo[]>(todoStore.todos);
 const todos = ref<Todo[]>(allTodos.value.filter((task: Todo) => !task.completed) || []);
 const todosCompleted = ref<Todo[]>(allTodos.value.filter((task: Todo) => task.completed) || []);
@@ -29,6 +31,7 @@ const sortTodos = ref<boolean>(false);
 const newTodo = ref<string>('');
 const showEdit = ref<Boolean>(false);
 const selectedEditTodo = ref<Todo | null>(null);
+const showListCategory = ref<boolean>(false);
 
 const paginationData: PaginationData = {
     currentPage: 1,
@@ -110,6 +113,17 @@ function paginationTodo() {
     const pagedTodos = allTodos.value.slice(startIndex, endIndex);
     todos.value = pagedTodos.filter((task: Todo) => !task.completed) || [];
     todosCompleted.value = pagedTodos.filter((task: Todo) => task.completed) || [];
+}
+
+function toggleListCategory() {
+    showListCategory.value = !showListCategory.value;
+}
+
+function addCategories(category: Category) {
+    if(category){
+        todoStore.addCategories(category);
+        showListCategory.value = false;
+    }
 }
 
 onMounted(() => {
@@ -203,17 +217,23 @@ watch(sortTodos, () => {
                 <button @click="starTodoHandler(selectedEditTodo?.id)">
                     <StarIcon :class="['h-6 w-6 text-blue-500', selectedEditTodo?.star ? 'fill-blue-500' : '']" />
                 </button>
+                
             </div>
 
             <div class="transition-all flex flex-col  px-3 py-4 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2">
-                <div class="flex justify-between mb-2">
+                <div class="flex justify-between mb-2 relative">
                     <div class="flex items-center">
                         <TagIcon class="w-4 h-4 mr-2 text-white" />
                         <h2 class="text-white">Categories:</h2>
                     </div>
-                    <button class="w-6 h-6 bg-blue-500 rounded-full hover:scale-110"><PlusIcon class="w-5 h-5 text-white mx-auto" /></button>
+                    <button @click="toggleListCategory" class="w-6 h-6 bg-blue-500 rounded-full hover:scale-110"><PlusIcon class="w-5 h-5 text-white mx-auto" /></button>
+
+                    <div v-if="showListCategory" class="absolute top-7 right-2 w-[150px] h-auto flex flex-col bg-[#0b0b0b] border border-blue-400 rounded-md py-2 px-4 shadow">
+                        <div v-for="category in categories" @click="addCategories(category)" :key="category.id" class="py-1.5">{{ category.name }}</div>
+                    </div>
+
                 </div>
-                    <div  v-for="(category, index) in selectedEditTodo.categories" :key="index" class="flex items-center ">
+                    <div v-for="(category, index) in selectedEditTodo.categories" :key="index" class="flex items-center">
                         <PlusIcon class="w-3 h-3 text-blue-400 mr-2" />{{ category }}
                     </div>
             </div>
