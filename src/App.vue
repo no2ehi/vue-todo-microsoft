@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import TodoApp from './components/TodoApp.vue'
+import LayoutView from './views/LayoutView.vue';
 </script>
 
 <template>
-  <TodoApp/>
+  <LayoutView>
+    <RouterView/>
+  </LayoutView>
 </template>
