@@ -13,10 +13,10 @@ const categories = ref<Category[]>(todoStore.categories);
 const selectedOptions = ref<string[]>([]);
 
 const filterCategories = () => {
-    let queries = route.query;
+    // let queries = route.query;
     if(selectedOptions.value.length > 0) {
         const filteredCategories = selectedOptions.value.join(',');
-        router.push({ name: 'todos', query: { ...queries, selectedCategories: filteredCategories, page: 1 } });
+        router.push({ name: 'todos', query: { selectedCategories: filteredCategories, page: 1 } });
     } else {
         router.push({ name: 'todos', query: { page: 1}})
     }   
