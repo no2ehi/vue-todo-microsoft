@@ -3,17 +3,15 @@ import { ref } from 'vue';
 import { useTodoStore } from '../../store/todo';
 import Category from '../../type/category.js';
 import { TagIcon } from '@heroicons/vue/24/solid';
-import { useRoute, useRouter } from 'vue-router';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const route = useRoute();
 
 const todoStore = useTodoStore();
 const categories = ref<Category[]>(todoStore.categories);
 const selectedOptions = ref<string[]>([]);
 
 const filterCategories = () => {
-    // let queries = route.query;
     if(selectedOptions.value.length > 0) {
         const filteredCategories = selectedOptions.value.join(',');
         router.push({ name: 'todos', query: { selectedCategories: filteredCategories, page: 1 } });
