@@ -2,29 +2,30 @@
     <nav>
       <ul class="flex items-center ml-8">
         <li  class="text-blue-400 cursor-pointer px-2 py-1 bg-stone-900 rounded transition-all hover:bg-stone-800" :class="{ disabled: page === 1 }">
-          <router-link :to="{ name: 'todos', query: { page: page - 1 } }"  rel="prev">Previous</router-link>
+          <router-link :to="{ name: 'todos', query: { ...queries, page: page - 1 } }"  rel="prev">Previous</router-link>
         </li>
         
         <li v-for="pageNumber in pageNumbers" :key="pageNumber" >
-          <router-link :to="{ name: 'todos', query: { page: pageNumber } }" class="text-blue-400 cursor-pointer px-2 py-1 bg-stone-900 rounded transition-all hover:bg-stone-800 mx-1" :class="{ active: page === pageNumber }">{{ pageNumber }}</router-link>
+          <router-link :to="{ name: 'todos', query: { ...queries, page: pageNumber } }" class="text-blue-400 cursor-pointer px-2 py-1 bg-stone-900 rounded transition-all hover:bg-stone-800 mx-1" :class="{ active: page === pageNumber }">{{ pageNumber }}</router-link>
         </li>
   
         <li class="text-blue-400 cursor-pointer px-2 py-1 bg-stone-900 rounded transition-all hover:bg-stone-800" :class="{ disabled: page === totalPages }">
-          <router-link :to="{ name: 'todos', query: { page: page + 1 } }" rel="next">Next</router-link>
+          <router-link :to="{ name: 'todos', query: { ...queries, page: page + 1 } }" rel="next">Next</router-link>
         </li>
       </ul>
     </nav>
   </template>
   
   <script setup lang="ts">
-  import { computed } from 'vue'
-  import { useRoute } from 'vue-router'
+  import { computed, ref, watch } from 'vue'
+  import { LocationQueryRaw, useRoute } from 'vue-router'
   
   const props = defineProps(['totalCount', 'pageSize'])
+  const queries = ref<LocationQueryRaw>({});
  
   const totalPages = computed(() => Math.ceil(props.totalCount / props.pageSize));
-  
-  const route = useRoute()
+
+  const route = useRoute();
   const page = computed(() => parseInt(route.query.page?.toString() || '1', 10))
   const pageNumbers = computed(() => {
     const count = Math.min(5, totalPages.value) 
@@ -35,6 +36,10 @@
       pages.push(i)
     }
     return pages
+  });
+
+  watch(() => route.query, () => {
+    queries.value = route.query; 
   })
   </script>
   

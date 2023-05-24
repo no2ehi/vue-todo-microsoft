@@ -1,7 +1,9 @@
+import Category from "./category";
+
 export default interface Todo {
     id: number;
     text: string;
-    categories: Array<string>;
+    categories: Category[];
     completed: boolean;
     star: boolean;
   }

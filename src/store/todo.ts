@@ -19,7 +19,7 @@ export const useTodoStore = defineStore('todo', () => {
 
     function addTask(task: Todo) {
         if(task.text.length > 0) {
-            todos.value = [...todos.value, task];
+            todos.value = [task , ...todos.value];
         }
     }
 
@@ -68,7 +68,7 @@ export const useTodoStore = defineStore('todo', () => {
     }
 
     function searchTodo(text: string) {
-        if(text.length > 2) {
+        if(text.length) {
             loading.value = true;
             searchResult = todos.value.filter((todo: Todo) => todo.text.toLowerCase().includes(text.toLowerCase()));
             loading.value = false;
@@ -79,15 +79,19 @@ export const useTodoStore = defineStore('todo', () => {
     function filterTodo(selectedCategories: string[]) {
         if(selectedCategories.length > 0) {
             loading.value = true;
-            fitlerResult = todos.value.filter((todo: Todo) => todo.categories.some(cat => selectedCategories.includes(cat)))
+            fitlerResult = todos.value.filter((todo: Todo) => todo.categories.some(cat => selectedCategories.includes(cat.name)))
             loading.value = false;
             return fitlerResult;
         }
     }
 
-    function addCategories(category: Category) {
-        if(category) {
-             
+    function addCategories(selectedTodoId: number, selectedcategory: Category) {
+        if(selectedTodoId && selectedcategory) {
+            let findTodo = todos.value.find((todo) => todo.id === selectedTodoId);
+            if(findTodo) {
+                console.log(selectedcategory)
+                findTodo.categories.push(selectedcategory)
+            }
         }
     }
 
@@ -104,21 +108,21 @@ const initializeTodo: Todo[] = [
     {
         id: 1,
         text: 'Create Todo App with vue + TS + pinia',
-        categories: ['work','programming'],
+        categories: [{id: 1, name:'work'},{id: 3, name:'programming'}],
         completed: false,
         star: false
     },
     {
         id: 2,
         text: 'Create Blog with api',
-        categories: ['work','programming'],
+        categories: [{id: 1, name:'work'},{id: 3, name:'programming'}],
         completed: true,
         star: false
     },
     {
         id: 3,
         text: 'design todo app',
-        categories: ['work','programming'],
+        categories: [{id: 1, name:'work'},{id: 3, name:'programming'}],
         completed: false,
         star: true
     },
@@ -132,70 +136,105 @@ const initializeTodo: Todo[] = [
     {
         id: 5,
         text: 'go to gym',
-        categories: ['hobbies'],
+        categories: [{id: 2, name:'hobbies'}],
         completed: true,
         star: false
     },
     {
         id: 6,
         text: 'buy a laptop ',
-        categories: ['work'],
+        categories: [{id: 1, name:'work'}],
         completed: false,
         star: false
     },
     {
         id: 7,
         text: 'Learning English conversation',
-        categories: ['work','hobbies'],
+        categories: [{id: 1, name:'work'},{id: 2, name:'hobbies'}],
         completed: false,
         star: false
     },
     {
         id: 8,
         text: 'Call to mostafa',
-        categories: ['work'],
+        categories: [{id: 1, name:'work'}],
         completed: true,
         star: false
     },
     {
         id: 9,
         text: 'family meeting',
-        categories: ['hobbies'],
+        categories: [{id: 2, name:'hobbies'}],
         completed: false,
         star: true
     },
     {
         id: 10,
         text: 'Call to mostafa',
-        categories: ['work'],
+        categories: [{id: 1, name:'work'}],
         completed: true,
         star: false
     },
     {
         id: 11,
         text: 'family meeting',
-        categories: ['hobbies'],
+        categories: [{id: 2, name:'hobbies'}],
         completed: false,
         star: true
     },
     {
         id: 12,
         text: 'Call to mostafa',
-        categories: ['work'],
+        categories: [{id: 1, name:'work'}],
         completed: true,
         star: false
     },
     {
         id: 13,
         text: 'algorithm',
-        categories: ['book'],
+        categories: [{id: 4, name:'book'}],
         completed: false,
         star: true
     },
     {
         id: 14,
         text: 'learn driving car to my brother',
-        categories: ['hobbies'],
+        categories: [{id: 2, name:'hobbies'}],
+        completed: false,
+        star: true
+    },
+    {
+        id: 15,
+        text: 'learn driving car to my brother',
+        categories: [{id: 2, name:'hobbies'}],
+        completed: false,
+        star: true
+    },
+    {
+        id: 16,
+        text: 'learn driving car to my brother',
+        categories: [{id: 2, name:'hobbies'}],
+        completed: false,
+        star: true
+    },
+    {
+        id: 17,
+        text: 'learn driving car to my brother',
+        categories: [{id: 2, name:'hobbies'}],
+        completed: false,
+        star: true
+    },
+    {
+        id: 18,
+        text: 'learn driving car to my brother',
+        categories: [{id: 2, name:'hobbies'}],
+        completed: false,
+        star: true
+    },
+    {
+        id: 19,
+        text: 'learn driving car to my brother',
+        categories: [{id: 2, name: 'hobbies'}],
         completed: false,
         star: true
     },
@@ -203,19 +242,19 @@ const initializeTodo: Todo[] = [
 
 const initializeCategories: Category[] = [
     {
-        id: 1,
-        name: 'work'
+        id:1,
+        name:'work'
     },
     {
-        id: 2,
+        id:2,
         name: 'hobbies'
     },
     {
-        id: 1,
-        name: 'programming'
+        id:3,
+        name:'programming'
     },
     {
-        id: 1,
-        name: 'book'
+        id:4,
+        name:'book'
     },
 ]
