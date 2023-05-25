@@ -6,7 +6,7 @@ const routes: Array<RouteRecordRaw> = [
     path: "/",
     name: "todos",
     component: TodoListViewVue,
-    beforeEnter: (to, from, next) => {
+    beforeEnter: (to, _from, next) => {
       if (!to.query) {
         next({ path: "/", query: { page: 1 } });
       } else {
