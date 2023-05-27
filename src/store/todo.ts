@@ -37,6 +37,7 @@ export const useTodoStore = defineStore(
       }
     }
 
+
     function starTask(taskId: number) {
       if (taskId) {
         const updatedTodos = todos.value.map((todo: Todo) => {
@@ -73,12 +74,23 @@ export const useTodoStore = defineStore(
     function searchTodo(text: string) {
       if (text.length) {
         loading.value = true;
+        if (fitlerResult.length > 0) {
+          searchResult = fitlerResult.filter((todo: Todo) =>
+            todo.text.toLowerCase().includes(text.toLowerCase())
+          );
+          loading.value = false;
+          return searchResult;
+        }
         searchResult = todos.value.filter((todo: Todo) =>
           todo.text.toLowerCase().includes(text.toLowerCase())
         );
         loading.value = false;
         return searchResult;
       }
+    }
+
+    function clearSearchTodo() {
+      searchResult = [];
     }
 
     function filterTodo(selectedCategories: string[]) {
@@ -90,6 +102,10 @@ export const useTodoStore = defineStore(
         loading.value = false;
         return fitlerResult;
       }
+    }
+
+    function clearFilterTodo() {
+      fitlerResult = [];
     }
 
     function addCategories(selectedTodoId: number, selectedcategory: Category) {
@@ -118,7 +134,9 @@ export const useTodoStore = defineStore(
       addCategories,
       loading,
       searchResult,
+      clearSearchTodo,
       fitlerResult,
+      clearFilterTodo
     };
   },
   {
@@ -234,38 +252,38 @@ const initializeTodo: Todo[] = [
   },
   {
     id: 14,
-    text: "learn driving car to my brother",
+    text: "Driving car",
     categories: [{ id: 2, name: "hobbies" }],
     completed: false,
     star: true,
   },
   {
     id: 15,
-    text: "learn driving car to my brother",
-    categories: [{ id: 2, name: "hobbies" }],
+    text: "sell car",
+    categories: [{ id: 2, name: "hobbies" },{ id: 2, name: "work" }],
     completed: false,
     star: true,
   },
   {
     id: 16,
-    text: "learn driving car to my brother",
+    text: "register a new car",
     categories: [{ id: 2, name: "hobbies" }],
-    completed: false,
-    star: true,
+    completed: true,
+    star: false,
   },
   {
     id: 17,
-    text: "learn driving car to my brother",
+    text: "learn speaking english completely",
     categories: [{ id: 2, name: "hobbies" }],
     completed: false,
     star: true,
   },
   {
     id: 18,
-    text: "learn driving car to my brother",
+    text: "read about svelte.js",
     categories: [{ id: 2, name: "hobbies" }],
-    completed: false,
-    star: true,
+    completed: true,
+    star: false,
   },
   {
     id: 19,

@@ -43,11 +43,10 @@ const showEdit = ref<Boolean>(false);
 const selectedEditTodo = ref<Todo | null>(null);
 const showListCategory = ref<boolean>(false);
 let categoriesWithoutSelected = ref<Category[] | []>([]);
-// const loading = ref<boolean>(todoStore.loading);
 
 const paginationData: PaginationData = {
   currentPage: 1,
-  pageSize: 6,
+  pageSize: 3,
   totalCount: allTodos.value.length,
 };
 
@@ -126,6 +125,8 @@ function toggleListCategory() {
             )
         )
       ).value || [];
+  } else {
+    categoriesWithoutSelected.value = categories.value;
   }
   showListCategory.value = !showListCategory.value;
 }
@@ -179,16 +180,16 @@ onMounted(() => {
 watch(
   () => route.query,
   () => {
-    if (route.query.search) {
+    if (route.query.search && route.query.search?.length > 2) {
       allTodos.value = todoStore.searchTodo(route.query.search as string) || [];
       updateTodos();
     } else if (route.query.selectedCategories) {
       const selectedCategories = (
         route.query.selectedCategories as string
-      )?.split(",");
-      allTodos.value = todoStore.filterTodo(selectedCategories) || [];
-      updateTodos();
-    } else {
+        )?.split(",");
+        allTodos.value = todoStore.filterTodo(selectedCategories) || [];
+        updateTodos();
+      } else if(route.query.page && !route.query.selectedCategories && !route.query.search) {
       allTodos.value = todoStore.todos;
       updateTodos();
     }

@@ -1,15 +1,16 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { useTodoStore } from "../../store/todo";
-import Category from "../../type/category.js";
+import Category from "../../type/category";
 import { TagIcon } from "@heroicons/vue/24/solid";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 const router = useRouter();
+const route = useRoute();
 
 const todoStore = useTodoStore();
 const categories = ref<Category[]>(todoStore.categories);
-const selectedOptions = ref<string[]>([]);
+const selectedOptions = ref<string[] | []>(route.query.selectedCategories ? (route.query.selectedCategories as string).split(",") : []);
 
 const filterCategories = () => {
   if (selectedOptions.value.length > 0) {
@@ -19,9 +20,18 @@ const filterCategories = () => {
       query: { selectedCategories: filteredCategories, page: 1 },
     });
   } else {
-    router.push({ name: "todos", query: { page: 1 } });
+    selectedOptions.value = [];
+    todoStore.clearFilterTodo();
+    const search = route.query.search;
+    router.push({ name: "todos", query: { search: search, page: 1 } });
   }
 };
+
+watch(() => route.query.selectedCategories, () => {
+  selectedOptions.value = (
+        route.query.selectedCategories as string
+        )?.split(",") || [];
+});
 </script>
 
 <template>
