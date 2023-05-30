@@ -14,14 +14,18 @@ import Todo from "../type/todo";
 import Category from "../type/category";
 import PaginationData from "../type/paginationData";
 
+//utils
+import moment from "moment";
+
 // icons
-import { StarIcon } from "@heroicons/vue/24/outline";
+import { CalendarIcon, StarIcon } from "@heroicons/vue/24/outline";
 import {
   ChevronRightIcon,
   ListBulletIcon,
   TrashIcon,
   PlusIcon,
   TagIcon,
+XMarkIcon,
 } from "@heroicons/vue/24/solid";
 import { computed } from "@vue/reactivity";
 
@@ -42,11 +46,12 @@ const newTodo = ref<string>("");
 const showEdit = ref<Boolean>(false);
 const selectedEditTodo = ref<Todo | null>(null);
 const showListCategory = ref<boolean>(false);
+const showCalendar = ref<boolean>(false);
 let categoriesWithoutSelected = ref<Category[] | []>([]);
 
 const paginationData: PaginationData = {
   currentPage: 1,
-  pageSize: 3,
+  pageSize: 5,
   totalCount: allTodos.value.length,
 };
 
@@ -58,6 +63,7 @@ function addTask(): void {
       completed: false,
       categories: [],
       star: false,
+      dueDate: '',
     };
     todoStore.addTask(newTask);
     allTodos.value = todoStore.todos;
@@ -138,6 +144,19 @@ function addCategories(
   if (selectedEditTodo && category) {
     todoStore.addCategories(selectedEditTodo, category);
     showListCategory.value = false;
+    updateTodos();
+  }
+}
+
+function showDueDate(){
+  showCalendar.value = !showCalendar.value;
+}
+
+function removeDueDate(todoId?: number | null){
+  if (todoId) {
+    todoStore.deleteDueDate(todoId);
+    showEdit.value = false;
+    allTodos.value = todoStore.todos;
     updateTodos();
   }
 }
@@ -244,7 +263,7 @@ const titleComputed = computed(() => {
       <div v-if="pagedTodo.length > 0" class="overflow-y-scroll px-6 pb-20">
         <div
           v-for="todo in todos"
-          class="transition-all flex items-center px-3 py-4 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
+          class="transition-all flex items-center px-3 py-3.5 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
           @click.self="showEditTodo(todo)"
         >
           <button @click.stop="completedTodoHandler(todo.id)">
@@ -257,8 +276,13 @@ const titleComputed = computed(() => {
               ]"
             ></div>
           </button>
-          <div class="flex-grow mx-4" @click.self="showEditTodo(todo)">
+          <div class="flex-grow flex flex-col mx-4" @click.self="showEditTodo(todo)">
             {{ todo.text }}
+            <span  v-if="todo.dueDate.length > 0 "
+              @click.self="showEditTodo(todo)"
+              :class="['text-blue-400 text-xs',{'text-red-400': new Date(todo.dueDate) < new Date}]">
+              {{ moment(todo.dueDate).format('LLLL') }}
+            </span>
           </div>
           <button @click.stop="starTodoHandler(todo.id)">
             <StarIcon
@@ -395,6 +419,40 @@ const titleComputed = computed(() => {
         </div>
       </div>
 
+      <div
+        class="transition-all flex flex-col px-3 py-4 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
+      >
+        <div class="flex justify-between mb-2 relative">
+          <div @click="showDueDate" class="flex items-center">
+            <CalendarIcon class="w-4 h-4 mr-2 text-white" />
+            <div v-if="selectedEditTodo.dueDate.length > 0" >
+              {{ moment(selectedEditTodo.dueDate).format('llll') }}
+            </div>
+            <h2 v-else class="text-white">Add Due Date</h2>
+          </div>
+
+          <button
+            v-if="selectedEditTodo.dueDate.length > 0 "
+            @click="removeDueDate(selectedEditTodo?.id)"
+            :class="'w-6 h-6 rounded-full hover:scale-110'"
+          >
+            <XMarkIcon  class="w-5 h-5 text-white mx-auto" />
+          </button>
+
+          <div
+            v-if="showCalendar"
+            @mouseleave="showDueDate"
+            class="absolute top-7 left-6 w-[250px] h-auto flex flex-col bg-[#0b0b0b] border border-blue-400 rounded-md py-4 px-4 shadow-md"
+          >
+            <label class="mb-2" for="dueDate">Select date & time:</label>
+            <input @change="editTodoHandler(selectedEditTodo)" v-model="selectedEditTodo.dueDate" class="text-black p-2" type="datetime-local" id="dueDate" name="dueDate">
+          </div>
+
+        </div>
+      </div>
+
+      
+
       <div>
         <button
           class="flex items-center justify-center mt-8 text-white"
@@ -403,6 +461,7 @@ const titleComputed = computed(() => {
           <TrashIcon class="h-5 w-5 text-stone-300 mr-3" />Delete Todo
         </button>
       </div>
+
     </div>
   </div>
 </template>

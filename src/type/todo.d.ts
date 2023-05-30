@@ -6,4 +6,5 @@ export default interface Todo {
     categories: Category[];
     completed: boolean;
     star: boolean;
+    dueDate: string
   }

@@ -59,6 +59,15 @@ export const useTodoStore = defineStore(
       }
     }
 
+    function deleteDueDate(taskId: number) {
+      if (taskId) {
+        const editedTodos = todos.value.map(
+          (todo: Todo) => todo.id === taskId ? {...todo, dueDate: ''} : todo
+        );
+        todos.value = editedTodos;
+      }
+    }
+
     function editTodo(todo: Todo) {
       if (todo.text.length > 0) {
         const updatedTodos = todos.value.map((oldTodo: Todo) => {
@@ -136,7 +145,8 @@ export const useTodoStore = defineStore(
       searchResult,
       clearSearchTodo,
       fitlerResult,
-      clearFilterTodo
+      clearFilterTodo,
+      deleteDueDate
     };
   },
   {
@@ -156,6 +166,7 @@ const initializeTodo: Todo[] = [
     ],
     completed: false,
     star: false,
+dueDate: '',
   },
   {
     id: 2,
@@ -166,6 +177,7 @@ const initializeTodo: Todo[] = [
     ],
     completed: true,
     star: false,
+dueDate: '',
   },
   {
     id: 3,
@@ -176,6 +188,7 @@ const initializeTodo: Todo[] = [
     ],
     completed: false,
     star: true,
+dueDate: '',
   },
   {
     id: 4,
@@ -183,6 +196,7 @@ const initializeTodo: Todo[] = [
     categories: [],
     completed: false,
     star: false,
+dueDate: '',
   },
   {
     id: 5,
@@ -190,6 +204,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: true,
     star: false,
+dueDate: '',
   },
   {
     id: 6,
@@ -197,6 +212,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 1, name: "work" }],
     completed: false,
     star: false,
+dueDate: '',
   },
   {
     id: 7,
@@ -207,6 +223,7 @@ const initializeTodo: Todo[] = [
     ],
     completed: false,
     star: false,
+    dueDate: '2023-05-25T10:30',
   },
   {
     id: 8,
@@ -214,6 +231,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 1, name: "work" }],
     completed: true,
     star: false,
+dueDate: '',
   },
   {
     id: 9,
@@ -221,6 +239,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: false,
     star: true,
+dueDate: '',
   },
   {
     id: 10,
@@ -228,6 +247,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 1, name: "work" }],
     completed: true,
     star: false,
+dueDate: '',
   },
   {
     id: 11,
@@ -235,6 +255,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: false,
     star: true,
+dueDate: '',
   },
   {
     id: 12,
@@ -242,6 +263,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 1, name: "work" }],
     completed: true,
     star: false,
+dueDate: '',
   },
   {
     id: 13,
@@ -249,6 +271,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 4, name: "book" }],
     completed: false,
     star: true,
+dueDate: '',
   },
   {
     id: 14,
@@ -256,6 +279,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: false,
     star: true,
+dueDate: '',
   },
   {
     id: 15,
@@ -263,6 +287,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" },{ id: 2, name: "work" }],
     completed: false,
     star: true,
+dueDate: '',
   },
   {
     id: 16,
@@ -270,6 +295,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: true,
     star: false,
+dueDate: '',
   },
   {
     id: 17,
@@ -277,6 +303,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: false,
     star: true,
+    dueDate: '2023-05-28T10:30',
   },
   {
     id: 18,
@@ -284,6 +311,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: true,
     star: false,
+    dueDate: '2023-04-21T09:56',
   },
   {
     id: 19,
@@ -291,6 +319,7 @@ const initializeTodo: Todo[] = [
     categories: [{ id: 2, name: "hobbies" }],
     completed: false,
     star: true,
+    dueDate: '2023-06-10T08:45',
   },
 ];
 
