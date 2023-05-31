@@ -36,6 +36,7 @@ watch(() => route.query.selectedCategories, () => {
 
 <template>
   <div class="w-1/5 min-h-screen bg-[#252423] p-5">
+
     <div class="flex items-center mb-2">
       <TagIcon class="w-4 h-4 mr-2 text-white" />
       <h2 class="text-white">Categories</h2>
@@ -59,5 +60,6 @@ watch(() => route.query.selectedCategories, () => {
         </label>
       </div>
     </div>
+    
   </div>
 </template>

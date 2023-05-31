@@ -1,39 +1,46 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
+import TypeSort from "../../type/type";
+
 import { ArrowLongDownIcon, ArrowLongUpIcon } from "@heroicons/vue/24/solid";
 
 const emit = defineEmits(["sort"]);
 const showSort = ref<boolean>(false);
 
-interface typeSort {
-  id: number;
-  type: string;
-  name: string;
-}
-
-const listTypeSort: typeSort[] = [
+const listTypeSort: TypeSort[] = [
   {
     id: 1,
     type: "ASC",
     name: "Alphabetical (Ascending)",
   },
   {
-    id: 1,
+    id: 2,
     type: "DESC",
     name: "Alphabetical (Descending)",
   },
   {
-    id: 1,
+    id: 3,
+    type: "DUE-Date-ASC",
+    name: "Due Date (Ascending)",
+  },
+  {
+    id: 3,
+    type: "DUE-Date-DESC",
+    name: "Due Date (Descending)",
+  },
+  {
+    id: 4,
     type: "ID",
     name: "ID (Descending)",
   },
 ];
+
 const ShowSortTask = () => {
   showSort.value = !showSort.value;
 };
 
-const selectTypeSort = (list: typeSort) => {
+const selectTypeSort = (list: TypeSort) => {
   showSort.value = false;
   emit("sort", list.type);
 };

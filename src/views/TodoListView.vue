@@ -172,12 +172,26 @@ const paginationTodo = computed(() => {
     return (pagedTodo.value = allTodos.value
       .sort((a, b) => a.text.localeCompare(b.text))
       .slice(startIndex, endIndex));
-  } else if (sortTodos.value === "DESC") {
+  } 
+  else if (sortTodos.value === "DESC") {
     // descending
     return (pagedTodo.value = allTodos.value
       .sort((a, b) => b.text.localeCompare(a.text))
       .slice(startIndex, endIndex));
-  } else {
+  }
+  else if (sortTodos.value === "DUE-Date-DESC") {
+    // Due Date desending
+      return (pagedTodo.value = allTodos.value
+      .sort((a, b) => a.dueDate > b.dueDate ? -1 : 1)
+      .slice(startIndex, endIndex)); 
+  } 
+  else if (sortTodos.value === "DUE-Date-ASC") {
+    // Due Date desending
+      return (pagedTodo.value = allTodos.value
+      .sort((a, b) => a.dueDate < b.dueDate ? -1 : 1)
+      .slice(startIndex, endIndex)); 
+  } 
+  else {
     return (pagedTodo.value = allTodos.value
       .sort((a, b) => b.id - a.id)
       .slice(startIndex, endIndex));
@@ -224,6 +238,13 @@ const titleComputed = computed(() => {
     ? `Searching For: ${route.query.search}`
     : `To Do List`;
 });
+
+const changeColorDueDate = computed(() => {
+  if(selectedEditTodo.value?.dueDate) {
+    return new Date(selectedEditTodo.value.dueDate) < new Date() ? 'text-red-400' : 'text-blue-300';
+  }
+});
+
 </script>
 
 <template>
@@ -425,7 +446,7 @@ const titleComputed = computed(() => {
         <div class="flex justify-between mb-2 relative">
           <div @click="showDueDate" class="flex items-center">
             <CalendarIcon class="w-4 h-4 mr-2 text-white" />
-            <div v-if="selectedEditTodo.dueDate.length > 0" >
+            <div v-if="selectedEditTodo.dueDate.length > 0" :class="changeColorDueDate">
               {{ moment(selectedEditTodo.dueDate).format('llll') }}
             </div>
             <h2 v-else class="text-white">Add Due Date</h2>
@@ -450,8 +471,6 @@ const titleComputed = computed(() => {
 
         </div>
       </div>
-
-      
 
       <div>
         <button

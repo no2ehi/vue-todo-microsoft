@@ -129,6 +129,10 @@ export const useTodoStore = defineStore(
       }
     }
 
+    function sortTodos(type) {
+
+    }
+
     return {
       todos,
       categories,
