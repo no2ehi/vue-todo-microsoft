@@ -8,12 +8,14 @@
         <router-link
           :to="{ name: 'todos', query: { ...queries, page: page - 1 } }"
           rel="prev"
+          @click="setCurrentPage(page - 1)"
           >Previous</router-link
         >
       </li>
 
       <li v-for="pageNumber in pageNumbers" :key="pageNumber">
         <router-link
+          @click="setCurrentPage(pageNumber)"
           :to="{ name: 'todos', query: { ...queries, page: pageNumber } }"
           class="text-blue-400 cursor-pointer px-2 py-1 bg-stone-900 rounded transition-all hover:bg-stone-800 mx-1"
           :class="{ active: page === pageNumber }"
@@ -26,6 +28,7 @@
         :class="{ disabled: page === totalPages }"
       >
         <router-link
+          @click="setCurrentPage(page + 1)"
           :to="{ name: 'todos', query: { ...queries, page: page + 1 } }"
           rel="next"
           >Next</router-link
@@ -38,13 +41,16 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { LocationQueryRaw, useRoute } from "vue-router";
+import { useTodoStore } from "../../store/todo";
 
 const props = defineProps(["totalCount", "pageSize"]);
 const queries = ref<LocationQueryRaw>({});
+const todoStore = useTodoStore();
 
 const totalPages = computed(() => Math.ceil(props.totalCount / props.pageSize));
 
 const route = useRoute();
+
 const page = computed(() => parseInt(route.query.page?.toString() || "1", 10));
 const pageNumbers = computed(() => {
   const count = Math.min(5, totalPages.value);
@@ -56,6 +62,11 @@ const pageNumbers = computed(() => {
   }
   return pages;
 });
+
+function setCurrentPage(currentPage: number) {
+  if(!currentPage) return;
+  todoStore.setCurrentPage(currentPage);
+}
 
 watch(
   () => route.query,

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { onMounted, ref } from "vue";
 import { useTodoStore } from "../../store/todo";
 import Category from "../../type/category";
 import { TagIcon } from "@heroicons/vue/24/solid";
@@ -10,27 +10,25 @@ const route = useRoute();
 
 const todoStore = useTodoStore();
 const categories = ref<Category[]>(todoStore.categories);
-const selectedOptions = ref<string[] | []>(route.query.selectedCategories ? (route.query.selectedCategories as string).split(",") : []);
+const selectedOptions = ref<string[] | null>([]);
 
 const filterCategories = () => {
-  if (selectedOptions.value.length > 0) {
-    const filteredCategories = selectedOptions.value.join(",");
+  const queries = route.query;
+  if (selectedOptions.value?.length === 0) {
+    selectedOptions.value = [];
+    todoStore.filterTodo(['']);
+    router.push({ name: "todos", query: { ...queries, page: 1 } });
+  }
+    const filteredCategories = selectedOptions.value?.join(",");
+    todoStore.filterTodo(selectedOptions.value);
     router.push({
       name: "todos",
-      query: { selectedCategories: filteredCategories, page: 1 },
-    });
-  } else {
-    selectedOptions.value = [];
-    todoStore.clearFilterTodo();
-    const search = route.query.search;
-    router.push({ name: "todos", query: { search: search, page: 1 } });
-  }
+      query: {  ...queries, selectedCategories: filteredCategories, page: 1 },
+    })
 };
 
-watch(() => route.query.selectedCategories, () => {
-  selectedOptions.value = (
-        route.query.selectedCategories as string
-        )?.split(",") || [];
+onMounted( () => {
+  selectedOptions.value = todoStore.selectedCategories ;
 });
 </script>
 

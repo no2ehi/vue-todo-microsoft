@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // vue
-import { onMounted, ref, watch } from "vue";
+import { ref } from "vue";
 
 import { useRoute } from "vue-router";
 import { useTodoStore } from "../store/todo";
@@ -12,7 +12,6 @@ import Pagination from "../components/pagination/Pagination.vue";
 // types
 import Todo from "../type/todo";
 import Category from "../type/category";
-import PaginationData from "../type/paginationData";
 
 //utils
 import moment from "moment";
@@ -25,35 +24,24 @@ import {
   TrashIcon,
   PlusIcon,
   TagIcon,
-XMarkIcon,
+  XMarkIcon,
+MinusIcon,
 } from "@heroicons/vue/24/solid";
 import { computed } from "@vue/reactivity";
 
-const todoStore = useTodoStore();
 const route = useRoute();
+const todoStore = useTodoStore();
+const categories = computed(() => todoStore.categories);
+const filteredTodos = computed(() => {
+  return todoStore.paginatedTodos;
+});
 
-const categories = ref<Category[]>(todoStore.categories);
-const allTodos = ref<Todo[]>(todoStore.todos);
-const pagedTodo = ref<Todo[]>(allTodos.value);
-const todos = ref<Todo[]>(
-  allTodos.value.filter((task: Todo) => !task.completed) || []
-);
-const todosCompleted = ref<Todo[]>(
-  allTodos.value.filter((task: Todo) => task.completed) || []
-);
-const sortTodos = ref<string>("ID");
 const newTodo = ref<string>("");
 const showEdit = ref<Boolean>(false);
 const selectedEditTodo = ref<Todo | null>(null);
 const showListCategory = ref<boolean>(false);
 const showCalendar = ref<boolean>(false);
 let categoriesWithoutSelected = ref<Category[] | []>([]);
-
-const paginationData: PaginationData = {
-  currentPage: 1,
-  pageSize: 5,
-  totalCount: allTodos.value.length,
-};
 
 function addTask(): void {
   if (newTodo.value.trim().length > 0) {
@@ -66,27 +54,18 @@ function addTask(): void {
       dueDate: '',
     };
     todoStore.addTask(newTask);
-    allTodos.value = todoStore.todos;
-    sortTodos.value = "ID";
-    updateTodos();
   }
   newTodo.value = "";
 }
 
 function completedTodoHandler(todoId?: number | null): void {
-  if (todoId) {
-    todoStore.completeTask(todoId);
-    allTodos.value = todoStore.todos;
-    updateTodos();
-  }
+  if (!todoId) return;
+  todoStore.completeTask(todoId);
 }
 
 function starTodoHandler(todoId?: number | null): void {
-  if (todoId) {
+  if (!todoId) return;
     todoStore.starTask(todoId);
-    allTodos.value = todoStore.todos;
-    updateTodos();
-  }
 }
 
 function showEditTodo(todo: Todo): void {
@@ -102,22 +81,17 @@ function editTodoHandler(todo?: Todo | null): void {
     todoStore.deleteTodo(todo.id);
     showEdit.value = false;
     selectedEditTodo.value = null;
-    allTodos.value = todoStore.todos;
-    updateTodos();
   }
 }
 
 function deleteTodoHandler(todoId?: number | null): void {
-  if (todoId) {
+  if (!todoId) return;
     todoStore.deleteTodo(todoId);
     showEdit.value = false;
-    allTodos.value = todoStore.todos;
-    updateTodos();
-  }
 }
 
 function sortedTodo(type: string) {
-  sortTodos.value = type;
+  todoStore.setTypeSort(type);
 }
 
 function toggleListCategory() {
@@ -144,8 +118,13 @@ function addCategories(
   if (selectedEditTodo && category) {
     todoStore.addCategories(selectedEditTodo, category);
     showListCategory.value = false;
-    updateTodos();
   }
+}
+
+function removeCategory(todoId?: number | null, categoryId?: number){
+  if (!categoryId || !todoId) return;
+  todoStore.deleteCategory(todoId, categoryId);
+  showEdit.value = false;
 }
 
 function showDueDate(){
@@ -153,88 +132,14 @@ function showDueDate(){
 }
 
 function removeDueDate(todoId?: number | null){
-  if (todoId) {
+  if (!todoId) return;
     todoStore.deleteDueDate(todoId);
     showEdit.value = false;
-    allTodos.value = todoStore.todos;
-    updateTodos();
-  }
 }
 
-const paginationTodo = computed(() => {
-  const startIndex =
-    (Number(route.query.page) - 1) * paginationData.pageSize || 0;
-  const endIndex =
-    startIndex + paginationData.pageSize || paginationData.pageSize;
-
-  if (sortTodos.value === "ASC") {
-    // ascending
-    return (pagedTodo.value = allTodos.value
-      .sort((a, b) => a.text.localeCompare(b.text))
-      .slice(startIndex, endIndex));
-  } 
-  else if (sortTodos.value === "DESC") {
-    // descending
-    return (pagedTodo.value = allTodos.value
-      .sort((a, b) => b.text.localeCompare(a.text))
-      .slice(startIndex, endIndex));
-  }
-  else if (sortTodos.value === "DUE-Date-DESC") {
-    // Due Date desending
-      return (pagedTodo.value = allTodos.value
-      .sort((a, b) => a.dueDate > b.dueDate ? -1 : 1)
-      .slice(startIndex, endIndex)); 
-  } 
-  else if (sortTodos.value === "DUE-Date-ASC") {
-    // Due Date desending
-      return (pagedTodo.value = allTodos.value
-      .sort((a, b) => a.dueDate < b.dueDate ? -1 : 1)
-      .slice(startIndex, endIndex)); 
-  } 
-  else {
-    return (pagedTodo.value = allTodos.value
-      .sort((a, b) => b.id - a.id)
-      .slice(startIndex, endIndex));
-  }
-});
-
-const updateTodos = () => {
-  pagedTodo.value = paginationTodo.value || [];
-  paginationData.totalCount = allTodos.value.length;
-  todos.value = pagedTodo.value.filter((task: Todo) => !task.completed) || [];
-  todosCompleted.value =
-    pagedTodo.value.filter((task: Todo) => task.completed) || [];
-};
-
-onMounted(() => {
-  updateTodos();
-});
-
-watch(
-  () => route.query,
-  () => {
-    if (route.query.search && route.query.search?.length > 2) {
-      allTodos.value = todoStore.searchTodo(route.query.search as string) || [];
-      updateTodos();
-    } else if (route.query.selectedCategories) {
-      const selectedCategories = (
-        route.query.selectedCategories as string
-        )?.split(",");
-        allTodos.value = todoStore.filterTodo(selectedCategories) || [];
-        updateTodos();
-      } else if(route.query.page && !route.query.selectedCategories && !route.query.search) {
-      allTodos.value = todoStore.todos;
-      updateTodos();
-    }
-  }
-);
-
-watch(sortTodos, () => {
-  updateTodos();
-});
 
 const titleComputed = computed(() => {
-  return route.query.search
+  return todoStore.searchText
     ? `Searching For: ${route.query.search}`
     : `To Do List`;
 });
@@ -258,8 +163,8 @@ const changeColorDueDate = computed(() => {
           </div>
           <SortTask @sort="sortedTodo" />
           <Pagination
-            :totalCount="paginationData.totalCount"
-            :pageSize="paginationData.pageSize"
+            :totalCount="todoStore.totalCount"
+            :pageSize="todoStore.itemsPerPage"
           />
         </div>
 
@@ -281,13 +186,11 @@ const changeColorDueDate = computed(() => {
         </div>
       </div>
 
-      <div v-if="pagedTodo.length > 0" class="overflow-y-scroll px-6 pb-20">
-        <div
-          v-for="todo in todos"
-          class="transition-all flex items-center px-3 py-3.5 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
-          @click.self="showEditTodo(todo)"
-        >
-          <button @click.stop="completedTodoHandler(todo.id)">
+      <div  v-if="filteredTodos.length > 0 "  class="overflow-y-scroll px-6 pb-20">
+        <div v-for="todo in filteredTodos">
+          <div v-if="todo.completed === false" class="transition-all flex items-center px-3 py-3.5 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
+          @click.self="showEditTodo(todo)">
+            <button @click.stop="completedTodoHandler(todo.id)">
             <div
               :class="[
                 'w-5 h-5 rounded-full transition-all',
@@ -313,6 +216,7 @@ const changeColorDueDate = computed(() => {
               ]"
             />
           </button>
+          </div>
         </div>
 
         <div class="mt-2">
@@ -321,12 +225,11 @@ const changeColorDueDate = computed(() => {
             <h2 class="text-stone-200 ml-2">Completed</h2>
           </div>
 
-          <div
-            v-for="todo in todosCompleted"
+          <div v-for="todo in filteredTodos">
+            <div v-if="todo.completed === true" 
             class="transition-all flex items-center px-3 py-4 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
-            @click="showEditTodo(todo)"
-          >
-            <button @click="completedTodoHandler(todo.id)">
+            @click="showEditTodo(todo)">
+              <button @click="completedTodoHandler(todo.id)">
               <div
                 :class="[
                   'w-5 h-5 rounded-full transition-all',
@@ -349,6 +252,7 @@ const changeColorDueDate = computed(() => {
                 ]"
               />
             </button>
+            </div>
           </div>
         </div>
       </div>
@@ -418,7 +322,7 @@ const changeColorDueDate = computed(() => {
           <div
             v-if="showListCategory"
             @mouseleave="toggleListCategory"
-            class="absolute top-7 right-2 w-[150px] h-auto flex flex-col bg-[#0b0b0b] border border-blue-400 rounded-md py-2 px-4 shadow-md"
+            class="absolute top-7 right-2 w-[150px] z-[999] h-auto flex flex-col bg-[#0b0b0b] border border-blue-400 rounded-md py-2 px-4 shadow-md"
           >
             <div
               v-if="categoriesWithoutSelected.length > 0"
@@ -430,13 +334,15 @@ const changeColorDueDate = computed(() => {
               {{ category.name }}
             </div>
           </div>
+
         </div>
         <div
           v-for="(category, index) in selectedEditTodo.categories"
           :key="index"
           class="flex items-center"
         >
-          <PlusIcon class="w-3 h-3 text-blue-400 mr-2" />{{ category.name }}
+          <MinusIcon @click="removeCategory(selectedEditTodo?.id, category.id)"
+          class="w-5 h-5 text-red-400 mr-2 hover:p-1 hover:bg-[#484848] rouded-full transition-all" />{{ category.name }}
         </div>
       </div>
 

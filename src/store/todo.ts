@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { ref } from "vue";
+import { computed, isRef, reactive, ref } from "vue";
 import Todo from "../type/todo";
 import Category from "../type/category";
 
@@ -8,21 +8,73 @@ export const useTodoStore = defineStore(
   () => {
     const todos = ref<Todo[]>([]);
     const categories = ref<Category[]>([]);
-    const loading = ref<boolean>(false);
-    let searchResult: Todo[] = [];
-    let fitlerResult: Todo[] = [];
+
+    let searchText = ref("");
+    let selectedCategories = ref<string[] | null>([]);
+    let typeSort = ref("ID");
+    const currentPage = ref(1);
+
+    const itemsPerPage = 5;
 
     function fetchTodos(): void {
-      if (todos.value.length === 0) {
-        todos.value = initializeTodo;
-        categories.value = initializeCategories;
+      if (todos.value.length > 0) return;
+      todos.value = initializeTodo;
+      categories.value = initializeCategories;
+    }
+
+    function sortTodos(type : string, filtered: Todo[]) {
+      if (type === "ASC") {
+        // ascending
+        return filtered.sort((a, b) => a.text.localeCompare(b.text));
+      } 
+      else if (type === "DESC") {
+        // descending
+        return filtered.sort((a, b) => b.text.localeCompare(a.text));
+      }
+      else if (type === "DUE-Date-DESC") {
+        // Due Date desending
+          return filtered.sort((a, b) => a.dueDate > b.dueDate ? -1 : 1);
+      } 
+      else if (type === "DUE-Date-ASC") {
+        // Due Date desending
+          return filtered.sort((a, b) => a.dueDate < b.dueDate ? -1 : 1);
+      } 
+      else {
+        return filtered.sort((a, b) => b.id - a.id);
       }
     }
 
-    function addTask(task: Todo) {
-      if (task.text.length > 0) {
-        todos.value = [task, ...todos.value];
+    const updateFilter = computed(() =>{
+      let filtered = todos.value;
+      
+      if (searchText.value.trim().length > 0) {
+        filtered = filtered.filter((todo: Todo) =>
+        todo.text.toLowerCase().includes(searchText.value.toLowerCase()));
       }
+      if (selectedCategories.value && selectedCategories.value?.length > 0) {
+        filtered = filtered.filter(
+          (todo: Todo) => todo.categories.some((category: Category) => selectedCategories.value?.includes(category.name) )
+          )
+        }
+        if(typeSort.value.length > 0) {
+          filtered = sortTodos(typeSort.value, filtered);
+        }
+      return filtered;
+      });
+
+    const paginatedTodos = computed(() => {
+      const startIndex = (currentPage.value - 1) * itemsPerPage;
+      const slicedTodos = [...updateFilter.value.slice(startIndex, startIndex + itemsPerPage)];    
+      return slicedTodos;
+    });
+
+    const totalCount = computed(() => {
+      return updateFilter.value.length;
+    });
+
+    function addTask(task: Todo) {
+      if (task.text.length < 0) return;
+      todos.value = [task, ...todos.value];
     }
 
     function completeTask(taskId: number) {
@@ -36,7 +88,6 @@ export const useTodoStore = defineStore(
         todos.value = updatedTodos;
       }
     }
-
 
     function starTask(taskId: number) {
       if (taskId) {
@@ -68,6 +119,21 @@ export const useTodoStore = defineStore(
       }
     }
 
+    function deleteCategory(todoId: number, categoryId: number){
+      if(!todoId || !categoryId) return;
+      const editedCategory = todos.value.map((todo: Todo) => {
+        if (todo.id === todoId) {
+          const updatedCategories = todo.categories.filter((category: Category) => category.id !== categoryId);
+          return {
+            ...todo,
+            categories: updatedCategories
+          };
+        }
+        return todo;
+      });
+      todos.value = editedCategory;
+    }
+
     function editTodo(todo: Todo) {
       if (todo.text.length > 0) {
         const updatedTodos = todos.value.map((oldTodo: Todo) => {
@@ -81,40 +147,20 @@ export const useTodoStore = defineStore(
     }
 
     function searchTodo(text: string) {
-      if (text.length) {
-        loading.value = true;
-        if (fitlerResult.length > 0) {
-          searchResult = fitlerResult.filter((todo: Todo) =>
-            todo.text.toLowerCase().includes(text.toLowerCase())
-          );
-          loading.value = false;
-          return searchResult;
-        }
-        searchResult = todos.value.filter((todo: Todo) =>
-          todo.text.toLowerCase().includes(text.toLowerCase())
-        );
-        loading.value = false;
-        return searchResult;
-      }
+      if (text.length < 0) return; 
+        searchText.value = text;
     }
 
-    function clearSearchTodo() {
-      searchResult = [];
+    function filterTodo(filterCategories: string[] | null) {
+      selectedCategories.value = filterCategories;
     }
 
-    function filterTodo(selectedCategories: string[]) {
-      if (selectedCategories.length > 0) {
-        loading.value = true;
-        fitlerResult = todos.value.filter((todo: Todo) =>
-          todo.categories.some((cat) => selectedCategories.includes(cat.name))
-        );
-        loading.value = false;
-        return fitlerResult;
-      }
+    function setCurrentPage(pageNumber: number) {
+      currentPage.value = pageNumber;
     }
 
-    function clearFilterTodo() {
-      fitlerResult = [];
+    function setTypeSort(type: string){
+      typeSort.value = type;
     }
 
     function addCategories(selectedTodoId: number, selectedcategory: Category) {
@@ -141,12 +187,17 @@ export const useTodoStore = defineStore(
       searchTodo,
       filterTodo,
       addCategories,
-      loading,
-      searchResult,
-      clearSearchTodo,
-      fitlerResult,
-      clearFilterTodo,
-      deleteDueDate
+      setCurrentPage,
+      deleteDueDate,
+      setTypeSort,
+      deleteCategory,
+      currentPage,
+      paginatedTodos,
+      updateFilter,
+      totalCount,
+      itemsPerPage,
+      searchText,
+      selectedCategories,
     };
   },
   {
@@ -284,7 +335,7 @@ dueDate: '',
   {
     id: 15,
     text: "sell car",
-    categories: [{ id: 2, name: "hobbies" },{ id: 2, name: "work" }],
+    categories: [{ id: 2, name: "hobbies" },{ id: 1, name: "work" }],
     completed: false,
     star: true,
 dueDate: '',

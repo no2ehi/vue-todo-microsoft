@@ -1,26 +1,37 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useTodoStore } from "../../store/todo";
 
 const router = useRouter();
 const route = useRoute();
 const todoStore = useTodoStore();
-const searchText = ref<string>((route.query.search as string) || "");
+const searchText = ref<string>("");
+let timeoutId:null | number = null;
 
 const searchTodo = () => {
-  let selectedCategories = route.query.selectedCategories;
-  if (searchText.value.trim().length > 2) {
+  if (timeoutId) {
+      clearTimeout(timeoutId);
+  }
+  timeoutId = setTimeout(() => {
+    
+    let queries = route.query;
+    if (searchText.value.trim().length === 0) {
+      searchText.value = "";
+      todoStore.searchTodo('')
+      router.push({ name: "todos", query: { ...queries, page: "1" } });
+    }
+    todoStore.searchTodo(searchText.value);
     router.push({
       name: "todos",
-      query: { selectedCategories: selectedCategories, search: searchText.value, page: "1" },
-    });
-  } else if (searchText.value.trim().length === 0) {
-    searchText.value = "";
-    todoStore.clearSearchTodo();
-    router.push({ name: "todos", query: { selectedCategories: selectedCategories, page: "1" } });
-  }
+      query: { ...queries, search: searchText.value, page: "1" },
+    })
+  }, 500);
+
 };
+onMounted(() => {
+  searchText.value = todoStore.searchText;
+})
 </script>
 
 <template>
