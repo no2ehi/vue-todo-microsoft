@@ -1,7 +1,19 @@
+<template>
+  <div class="w-1/4">
+    <input
+      @input="searchTodo"
+      v-model.trim="searchText"
+      type="text"
+      class="w-full px-3 py-1 rounded bg-[#484644] text-white outline-none focus:shadow-md"
+      placeholder="search..."
+    />
+  </div>
+</template>
+
 <script setup lang="ts">
 import { onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useTodoStore } from "../../store/todo";
+import { useTodoStore } from "../../store/todo.js";
 
 const router = useRouter();
 const route = useRoute();
@@ -33,15 +45,3 @@ onMounted(() => {
   searchText.value = todoStore.searchText;
 })
 </script>
-
-<template>
-  <div class="w-1/4">
-    <input
-      @input="searchTodo"
-      v-model.trim="searchText"
-      type="text"
-      class="w-full px-3 py-1 rounded bg-[#484644] text-white outline-none focus:shadow-md"
-      placeholder="search..."
-    />
-  </div>
-</template>

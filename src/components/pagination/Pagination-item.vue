@@ -41,7 +41,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { LocationQueryRaw, useRoute } from "vue-router";
-import { useTodoStore } from "../../store/todo";
+import { useTodoStore } from "../../store/todo.js";
 
 const props = defineProps(["totalCount", "pageSize"]);
 const queries = ref<LocationQueryRaw>({});

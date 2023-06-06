@@ -1,10 +1,3 @@
-<script setup lang="ts">
-import Search from "./Search.vue";
-import { RouterLink } from "vue-router";
-
-import { RectangleStackIcon } from "@heroicons/vue/24/solid";
-</script>
-
 <template>
   <div
     class="flex bg-[#1b1a19] w-full px-5 py-2 text-white border-b border-stone-700"
@@ -18,5 +11,12 @@ import { RectangleStackIcon } from "@heroicons/vue/24/solid";
     <Search />
   </div>
 </template>
+
+<script setup lang="ts">
+import Search from "./Search-item.vue";
+import { RouterLink } from "vue-router";
+
+import { RectangleStackIcon } from "@heroicons/vue/24/solid";
+</script>
 
 <style scoped></style>

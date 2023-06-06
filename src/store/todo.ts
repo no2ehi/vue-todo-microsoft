@@ -9,9 +9,9 @@ export const useTodoStore = defineStore(
     const todos = ref<Todo[]>([]);
     const categories = ref<Category[]>([]);
 
-    let searchText = ref("");
-    let selectedCategories = ref<string[] | null>([]);
-    let typeSort = ref("ID");
+    const searchText = ref("");
+    const selectedCategories = ref<string[] | null>([]);
+    const typeSort = ref("ID");
     const currentPage = ref(1);
 
     const itemsPerPage = 5;
@@ -165,8 +165,8 @@ export const useTodoStore = defineStore(
 
     function addCategories(selectedTodoId: number, selectedcategory: Category) {
       if (selectedTodoId && selectedcategory) {
-        let findTodo = todos.value.find((todo: Todo) => todo.id === selectedTodoId);
-        let checkCategory = findTodo?.categories.filter(
+        const findTodo = todos.value.find((todo: Todo) => todo.id === selectedTodoId);
+        const checkCategory = findTodo?.categories.filter(
           (category: Category) => category.id === selectedcategory.id
         );
         if (findTodo && !((checkCategory?.length ?? 0) > 0)) {

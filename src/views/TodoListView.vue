@@ -1,13 +1,13 @@
 <script setup lang="ts">
 // vue
-import { ref } from "vue";
+import { ref, computed } from "vue";
 
 import { useRoute } from "vue-router";
 import { useTodoStore } from "../store/todo";
 
 //components
 import SortTask from "../components/sort/SortTask.vue";
-import Pagination from "../components/pagination/Pagination.vue";
+import Pagination from "../components/pagination/Pagination-item.vue";
 
 // types
 import Todo from "../type/todo";
@@ -27,7 +27,6 @@ import {
   XMarkIcon,
 MinusIcon,
 } from "@heroicons/vue/24/solid";
-import { computed } from "@vue/reactivity";
 
 const route = useRoute();
 const todoStore = useTodoStore();
@@ -36,11 +35,11 @@ const filteredTodos = computed(() => {
   return todoStore.paginatedTodos;
 });
 
-const newTodo = ref<string>("");
-const showEdit = ref<Boolean>(false);
+const newTodo = ref("");
+const showEdit = ref(false);
 const selectedEditTodo = ref<Todo | null>(null);
-const showListCategory = ref<boolean>(false);
-const showCalendar = ref<boolean>(false);
+const showListCategory = ref(false);
+const showCalendar = ref(false);
 let categoriesWithoutSelected = ref<Category[] | []>([]);
 
 function addTask(): void {
@@ -145,9 +144,8 @@ const titleComputed = computed(() => {
 });
 
 const changeColorDueDate = computed(() => {
-  if(selectedEditTodo.value?.dueDate) {
-    return new Date(selectedEditTodo.value.dueDate) < new Date() ? 'text-red-400' : 'text-blue-300';
-  }
+  if(!selectedEditTodo.value?.dueDate) return;
+  return new Date(selectedEditTodo.value.dueDate) < new Date() ? 'text-red-400' : 'text-blue-300';
 });
 
 </script>
@@ -187,7 +185,7 @@ const changeColorDueDate = computed(() => {
       </div>
 
       <div  v-if="filteredTodos.length > 0 "  class="overflow-y-scroll px-6 pb-20">
-        <div v-for="todo in filteredTodos">
+        <div v-for="todo in filteredTodos" :key="todo.id">
           <div v-if="todo.completed === false" class="transition-all flex items-center px-3 py-3.5 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
           @click.self="showEditTodo(todo)">
             <button @click.stop="completedTodoHandler(todo.id)">
@@ -225,7 +223,7 @@ const changeColorDueDate = computed(() => {
             <h2 class="text-stone-200 ml-2">Completed</h2>
           </div>
 
-          <div v-for="todo in filteredTodos">
+          <div v-for="todo in filteredTodos" :key="todo.id">
             <div v-if="todo.completed === true" 
             class="transition-all flex items-center px-3 py-4 rounded bg-[#2d2b2a] hover:bg-[#3b3a39] text-white cursor-pointer mb-2"
             @click="showEditTodo(todo)">
@@ -256,7 +254,7 @@ const changeColorDueDate = computed(() => {
           </div>
         </div>
       </div>
-      <div v-else="pagedTodo.length > 0" class="overflow-y-scroll px-6 pb-20">
+      <div v-else class="overflow-y-scroll px-6 pb-20">
         <h1 class="text-white">No results found!</h1>
       </div>
     </div>
@@ -324,8 +322,8 @@ const changeColorDueDate = computed(() => {
             @mouseleave="toggleListCategory"
             class="absolute top-7 right-2 w-[150px] z-[999] h-auto flex flex-col bg-[#0b0b0b] border border-blue-400 rounded-md py-2 px-4 shadow-md"
           >
+          <div v-if="categoriesWithoutSelected.length > 0">
             <div
-              v-if="categoriesWithoutSelected.length > 0"
               v-for="category in categoriesWithoutSelected"
               @click="addCategories(selectedEditTodo?.id, category)"
               :key="category.id"
@@ -334,7 +332,7 @@ const changeColorDueDate = computed(() => {
               {{ category.name }}
             </div>
           </div>
-
+        </div>
         </div>
         <div
           v-for="(category, index) in selectedEditTodo.categories"

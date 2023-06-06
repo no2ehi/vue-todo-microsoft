@@ -1,39 +1,3 @@
-<script setup lang="ts">
-import { onMounted, ref } from "vue";
-import { useTodoStore } from "../../store/todo";
-import Category from "../../type/category";
-import { TagIcon } from "@heroicons/vue/24/solid";
-import { useRoute, useRouter } from "vue-router";
-
-const router = useRouter();
-const route = useRoute();
-
-const todoStore = useTodoStore();
-const categories = ref<Category[]>(todoStore.categories);
-const selectedOptions = ref<string[] | null>([]);
-
-const filterCategories = () => {
-  const queries = route.query;
-  if (selectedOptions.value?.length === 0) {
-    selectedOptions.value = [];
-    todoStore.filterTodo(['']);
-    router.push({ name: "todos", query: { ...queries, page: 1 } });
-  }
-    const filteredCategories = selectedOptions.value?.join(",");
-    console.log('select', selectedOptions.value);
-    
-    todoStore.filterTodo(selectedOptions.value);
-    router.push({
-      name: "todos",
-      query: {  ...queries, selectedCategories: filteredCategories, page: 1 },
-    })
-};
-
-onMounted( () => {
-  selectedOptions.value = todoStore.selectedCategories ;
-});
-</script>
-
 <template>
   <div class="w-1/5 min-h-screen bg-[#252423] p-5">
 
@@ -63,3 +27,38 @@ onMounted( () => {
     
   </div>
 </template>
+
+<script setup lang="ts">
+import { onMounted, ref } from "vue";
+import { useTodoStore } from "../../store/todo.js";
+import Category from "../../type/category.js";
+import { TagIcon } from "@heroicons/vue/24/solid";
+import { useRoute, useRouter } from "vue-router";
+
+const router = useRouter();
+const route = useRoute();
+
+const todoStore = useTodoStore();
+const categories = ref<Category[]>(todoStore.categories);
+const selectedOptions = ref<string[] | null>([]);
+
+const filterCategories = () => {
+  const queries = route.query;
+  if (selectedOptions.value?.length === 0) {
+    selectedOptions.value = [];
+    todoStore.filterTodo(['']);
+    router.push({ name: "todos", query: { ...queries, page: 1 } });
+  }
+    const filteredCategories = selectedOptions.value?.join(",");
+    
+    todoStore.filterTodo(selectedOptions.value);
+    router.push({
+      name: "todos",
+      query: {  ...queries, selectedCategories: filteredCategories, page: 1 },
+    })
+};
+
+onMounted( () => {
+  selectedOptions.value = todoStore.selectedCategories ;
+});
+</script>

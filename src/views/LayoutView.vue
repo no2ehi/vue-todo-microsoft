@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import Header from "../components/header/Header.vue";
-import Sidebar from "../components/sidebar/Sidebar.vue";
+import Header from "../components/header/Header-item.vue";
+import Sidebar from "../components/sidebar/Sidebar-item.vue";
 
 import { useTodoStore } from "../store/todo";
 
