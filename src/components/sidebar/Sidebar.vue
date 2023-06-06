@@ -20,6 +20,8 @@ const filterCategories = () => {
     router.push({ name: "todos", query: { ...queries, page: 1 } });
   }
     const filteredCategories = selectedOptions.value?.join(",");
+    console.log('select', selectedOptions.value);
+    
     todoStore.filterTodo(selectedOptions.value);
     router.push({
       name: "todos",

@@ -11,7 +11,7 @@
           @click="setCurrentPage(page - 1)"
           >Previous</router-link
         >
-      </li>
+      </li>  
 
       <li v-for="pageNumber in pageNumbers" :key="pageNumber">
         <router-link
@@ -39,7 +39,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { LocationQueryRaw, useRoute } from "vue-router";
 import { useTodoStore } from "../../store/todo";
 
@@ -68,12 +68,6 @@ function setCurrentPage(currentPage: number) {
   todoStore.setCurrentPage(currentPage);
 }
 
-watch(
-  () => route.query,
-  () => {
-    queries.value = route.query;
-  }
-);
 </script>
 
 <style scoped>

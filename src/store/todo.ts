@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { computed, isRef, reactive, ref } from "vue";
+import { computed, ref } from "vue";
 import Todo from "../type/todo";
 import Category from "../type/category";
 
@@ -165,9 +165,9 @@ export const useTodoStore = defineStore(
 
     function addCategories(selectedTodoId: number, selectedcategory: Category) {
       if (selectedTodoId && selectedcategory) {
-        let findTodo = todos.value.find((todo) => todo.id === selectedTodoId);
+        let findTodo = todos.value.find((todo: Todo) => todo.id === selectedTodoId);
         let checkCategory = findTodo?.categories.filter(
-          (category) => category.id === selectedcategory.id
+          (category: Category) => category.id === selectedcategory.id
         );
         if (findTodo && !((checkCategory?.length ?? 0) > 0)) {
           findTodo.categories.push(selectedcategory);
